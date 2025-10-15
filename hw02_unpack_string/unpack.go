@@ -12,8 +12,9 @@ func Unpack(str string) (string, error) {
 	return unpack(str)
 }
 
+//nolint:nestif
 func unpack(str string) (string, error) {
-	var res = []rune{}
+	res := []rune{}
 	var prevRune *rune
 	for _, v := range str {
 		if prevRune == nil {
