@@ -20,9 +20,8 @@ func unpack(str string) (string, error) {
 		if prevRune == nil {
 			if unicode.IsDigit(v) {
 				return "", ErrInvalidString
-			} else {
-				prevRune = &v
 			}
+			prevRune = &v
 		} else {
 			if unicode.IsDigit(v) {
 				n, err := strconv.Atoi(string(v))
