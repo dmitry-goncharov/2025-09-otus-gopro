@@ -20,6 +20,21 @@ func TestCache(t *testing.T) {
 		require.False(t, ok)
 	})
 
+	t.Run("update cache value", func(t *testing.T) {
+		c := NewCache(3)
+
+		ok := c.Set("a", 10)
+		require.False(t, ok)
+
+		ok = c.Set("a", 20)
+		require.True(t, ok)
+
+		v, ok := c.Get("a")
+
+		require.True(t, ok)
+		require.Equal(t, 20, v)
+	})
+
 	t.Run("simple", func(t *testing.T) {
 		c := NewCache(5)
 
@@ -49,8 +64,95 @@ func TestCache(t *testing.T) {
 		require.Nil(t, val)
 	})
 
+	t.Run("logic on set", func(t *testing.T) {
+		c := NewCache(3)
+
+		ok := c.Set("a", 10)
+		require.False(t, ok)
+
+		ok = c.Set("b", 20)
+		require.False(t, ok)
+
+		ok = c.Set("c", 30)
+		require.False(t, ok)
+
+		ok = c.Set("d", 40)
+		require.False(t, ok)
+
+		val, ok := c.Get("a")
+		require.False(t, ok)
+		require.Nil(t, val)
+	})
+
+	t.Run("logic on get", func(t *testing.T) {
+		c := NewCache(3)
+
+		c.Set("a", 10)
+		c.Set("b", 20)
+		c.Set("c", 30)
+
+		val, ok := c.Get("a")
+		require.True(t, ok)
+		require.Equal(t, 10, val)
+
+		val, ok = c.Get("b")
+		require.True(t, ok)
+		require.Equal(t, 20, val)
+
+		ok = c.Set("d", 40)
+		require.False(t, ok)
+
+		val, ok = c.Get("c")
+		require.False(t, ok)
+		require.Nil(t, val)
+	})
+
+	t.Run("logic on get and set", func(t *testing.T) {
+		c := NewCache(3)
+
+		c.Set("a", 10)
+		c.Set("b", 20)
+		c.Set("c", 30)
+
+		val, ok := c.Get("a")
+		require.True(t, ok)
+		require.Equal(t, 10, val)
+
+		val, ok = c.Get("b")
+		require.True(t, ok)
+		require.Equal(t, 20, val)
+
+		ok = c.Set("c", 25)
+		require.True(t, ok)
+
+		ok = c.Set("d", 40)
+		require.False(t, ok)
+
+		val, ok = c.Get("a")
+		require.False(t, ok)
+		require.Nil(t, val)
+	})
+
 	t.Run("purge logic", func(t *testing.T) {
-		// Write me
+		c := NewCache(3)
+
+		c.Set("a", 10)
+		c.Set("b", 20)
+		c.Set("c", 30)
+
+		c.Clear()
+
+		val, ok := c.Get("a")
+		require.False(t, ok)
+		require.Nil(t, val)
+
+		val, ok = c.Get("b")
+		require.False(t, ok)
+		require.Nil(t, val)
+
+		val, ok = c.Get("c")
+		require.False(t, ok)
+		require.Nil(t, val)
 	})
 }
 
