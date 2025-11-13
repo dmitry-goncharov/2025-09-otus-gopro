@@ -11,18 +11,12 @@ type Task func() error
 
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
 func Run(tasks []Task, n, m int) error {
-	jobs := make(chan Task, len(tasks))
+	stop := make(chan struct{}, n+1)
 
-	var errsLen int
-	if m > 0 {
-		errsLen = 0
-	} else {
-		errsLen = len(tasks)
-	}
-	errs := make(chan error, errsLen)
+	jobs := producer(stop, tasks)
+
+	errs := make(chan error)
 	defer close(errs)
-
-	stop := make(chan struct{}, n)
 
 	wg := &sync.WaitGroup{}
 
@@ -30,14 +24,6 @@ func Run(tasks []Task, n, m int) error {
 		wg.Add(1)
 		go worker(wg, jobs, errs, stop)
 	}
-
-	go func() {
-		defer close(jobs)
-
-		for _, task := range tasks {
-			jobs <- task
-		}
-	}()
 
 	var res error
 	go func() {
@@ -62,6 +48,24 @@ func Run(tasks []Task, n, m int) error {
 	return res
 }
 
+func producer(stop <-chan struct{}, tasks []Task) <-chan Task {
+	jobs := make(chan Task)
+
+	go func() {
+		defer close(jobs)
+
+		for _, task := range tasks {
+			select {
+			case <-stop:
+				return
+			case jobs <- task:
+			}
+		}
+	}()
+
+	return jobs
+}
+
 func worker(wg *sync.WaitGroup, tasks <-chan Task, errs chan<- error, stop <-chan struct{}) {
 	defer wg.Done()
 
@@ -69,8 +73,7 @@ func worker(wg *sync.WaitGroup, tasks <-chan Task, errs chan<- error, stop <-cha
 		select {
 		case <-stop:
 			return
-		default:
-			task, ok := <-tasks
+		case task, ok := <-tasks:
 			if ok {
 				err := task()
 				if err != nil {
