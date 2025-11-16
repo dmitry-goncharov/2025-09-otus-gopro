@@ -11,7 +11,7 @@ type Task func() error
 
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
 func Run(tasks []Task, n, m int) error {
-	stop := make(chan struct{}, n+1)
+	stop := make(chan struct{})
 
 	jobs := producer(stop, tasks)
 
@@ -27,17 +27,13 @@ func Run(tasks []Task, n, m int) error {
 
 	var res error
 	go func() {
-		defer close(stop)
-
 		errCounter := 0
 		for range errs {
 			if m > 0 {
 				errCounter++
 				if errCounter == m {
 					res = ErrErrorsLimitExceeded
-					for range n {
-						stop <- struct{}{}
-					}
+					close(stop)
 				}
 			}
 		}
