@@ -33,7 +33,7 @@ func take(done In, in In) Out {
 				if !ok {
 					return
 				}
-				select{
+				select {
 				case <-done:
 				case out <- v:
 				}
