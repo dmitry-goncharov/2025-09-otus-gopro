@@ -35,6 +35,7 @@ func take(done In, in In) Out {
 				}
 				select {
 				case <-done:
+					return
 				case out <- v:
 				}
 			}
