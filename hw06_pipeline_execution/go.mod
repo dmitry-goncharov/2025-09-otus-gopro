@@ -1,4 +1,4 @@
-module github.com/fixme_my_friend/hw06_pipeline_execution
+module github.com/dmitry-goncharov/2025-09-otus-gopro/hw06_pipeline_execution
 
 go 1.23
 
