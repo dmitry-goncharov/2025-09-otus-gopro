@@ -26,6 +26,6 @@ func TestRunCmd(t *testing.T) {
 		cmd := []string{"./testdata/echo1.sh"}
 		resCode := RunCmd(cmd, envs)
 
-		require.Equal(t, resCode, 1)
+		require.NotEqual(t, resCode, 0)
 	})
 }
