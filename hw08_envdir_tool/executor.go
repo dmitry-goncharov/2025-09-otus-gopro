@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -17,17 +16,7 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 		fmt.Println("Error update environment", err.Error())
 		return 1
 	}
-	err = runCmd(cmd)
-	if err != nil {
-		var exitErr *exec.ExitError
-		if errors.As(err, &exitErr) {
-			return exitErr.ExitCode()
-		}
-		fmt.Println("Error run command", err.Error())
-		return 1
-	}
-	fmt.Println("Run command successfully", cmd)
-	return 0
+	return runCmd(cmd)
 }
 
 func updateEnv(env Environment) error {
@@ -47,14 +36,15 @@ func updateEnv(env Environment) error {
 	return nil
 }
 
-func runCmd(cmd []string) error {
+func runCmd(cmd []string) int {
 	c := exec.Command(cmd[0], cmd[1:]...) //nolint:gosec
+	c.Env = os.Environ()
 	c.Stdin = os.Stdin
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
 	err := c.Run()
 	if err != nil {
-		return err
+		fmt.Println("Error run command", err.Error())
 	}
-	return nil
+	return c.ProcessState.ExitCode()
 }
