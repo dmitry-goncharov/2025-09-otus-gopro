@@ -16,7 +16,7 @@ func TestRunCmd(t *testing.T) {
 	}
 
 	t.Run("run cmd successfully", func(t *testing.T) {
-		cmd := []string{"./testdata/echo.sh"}
+		cmd := []string{"ls"}
 		resCode := RunCmd(cmd, envs)
 
 		require.Equal(t, resCode, 0)
