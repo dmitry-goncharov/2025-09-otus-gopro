@@ -40,6 +40,7 @@ func (c *TelnetClientSimple) Connect() error {
 		return fmt.Errorf("error connection: %w", err)
 	}
 	c.conn = conn
+	fmt.Println("...Connected to", c.address)
 	return nil
 }
 
@@ -47,6 +48,7 @@ func (c *TelnetClientSimple) Close() error {
 	if c.conn == nil {
 		return errNoConnection
 	}
+	fmt.Println("...Close")
 	return c.conn.Close()
 }
 
@@ -58,6 +60,7 @@ func (c *TelnetClientSimple) Send() error {
 	if err != nil {
 		return fmt.Errorf("error sending data: %w", err)
 	}
+	fmt.Println("...EOF")
 	return nil
 }
 
@@ -69,5 +72,6 @@ func (c *TelnetClientSimple) Receive() error {
 	if err != nil {
 		return fmt.Errorf("error receiving data: %w", err)
 	}
+	fmt.Println("...Connection was closed by peer")
 	return nil
 }
