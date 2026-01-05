@@ -25,7 +25,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "Can't open connection:", err.Error())
 		os.Exit(1)
 	}
-	defer close(client)
+	defer closeClient(client)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
@@ -47,7 +47,7 @@ func parseConf() (*conf, error) {
 	flag.Parse()
 	args := flag.Args()
 	if len(args) != 2 {
-		return nil, fmt.Errorf("Should be set host and port")
+		return nil, fmt.Errorf("should be set host and port")
 	}
 	return &conf{
 		host:    args[0],
@@ -72,7 +72,7 @@ func receive(client TelnetClient, cancel context.CancelFunc) {
 	}
 }
 
-func close(client TelnetClient) {
+func closeClient(client TelnetClient) {
 	err := client.Close()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Can't close connection:", err.Error())
