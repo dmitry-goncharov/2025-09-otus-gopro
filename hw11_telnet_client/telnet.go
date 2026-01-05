@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"net"
@@ -36,11 +35,7 @@ type TelnetClientSimple struct {
 var errNoConnection = fmt.Errorf("no connection")
 
 func (c *TelnetClientSimple) Connect() error {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
-	defer cancel()
-
-	dialer := &net.Dialer{}
-	conn, err := dialer.DialContext(ctx, "tcp", c.address)
+	conn, err := net.DialTimeout("tcp", c.address, c.timeout)
 	if err != nil {
 		return fmt.Errorf("error connection: %w", err)
 	}

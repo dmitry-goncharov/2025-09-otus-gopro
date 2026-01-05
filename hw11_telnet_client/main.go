@@ -36,13 +36,15 @@ func main() {
 		}
 	}()
 
-	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT)
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
 	go func() {
 		err := client.Send()
 		if err != nil {
 			fmt.Println("Can't send data:", err.Error())
+		} else {
+			fmt.Println("Connection was closed by send")
 		}
 		cancel()
 	}()
@@ -51,6 +53,8 @@ func main() {
 		err := client.Receive()
 		if err != nil {
 			fmt.Println("Can't receive data:", err.Error())
+		} else {
+			fmt.Println("Connection was closed by receive")
 		}
 		cancel()
 	}()
