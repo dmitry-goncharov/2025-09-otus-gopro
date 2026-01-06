@@ -29,7 +29,7 @@ func main() {
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
-	go send(client, cancel)
+	go send(client)
 	go receive(client, cancel)
 
 	<-ctx.Done()
@@ -56,8 +56,7 @@ func parseConf() (*conf, error) {
 	}, nil
 }
 
-func send(client TelnetClient, cancel context.CancelFunc) {
-	defer cancel()
+func send(client TelnetClient) {
 	err := client.Send()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Can't send data:", err.Error())
