@@ -56,11 +56,11 @@ func (c *TelnetClientSimple) Send() error {
 	if c.conn == nil {
 		return errNoConnection
 	}
+	defer fmt.Println("...EOF")
 	_, err := io.Copy(c.conn, c.in)
 	if err != nil {
 		return fmt.Errorf("error sending data: %w", err)
 	}
-	fmt.Println("...EOF")
 	return nil
 }
 
@@ -68,10 +68,10 @@ func (c *TelnetClientSimple) Receive() error {
 	if c.conn == nil {
 		return errNoConnection
 	}
+	defer fmt.Println("...Connection was closed by peer")
 	_, err := io.Copy(c.out, c.conn)
 	if err != nil {
 		return fmt.Errorf("error receiving data: %w", err)
 	}
-	fmt.Println("...Connection was closed by peer")
 	return nil
 }
