@@ -24,19 +24,13 @@ func validateString(tagName, tagVal, fldName, fldVal string) *ValidationError {
 	case StringRuleIn:
 		return validateStringRuleIn(tagVal, fldName, fldVal)
 	}
-	return &ValidationError{
-		Field: fldName,
-		Err:   fmt.Errorf("invalid StringRule tag name %s", tagName),
-	}
+	panic(fmt.Sprintf("invalid StringRule tag name: %q of field: %q", tagName, fldName))
 }
 
 func validateStringRuleLen(tagVal, fldName, fldVal string) *ValidationError {
 	strlen, err := strconv.Atoi(tagVal)
 	if err != nil {
-		return &ValidationError{
-			Field: fldName,
-			Err:   fmt.Errorf("invalid StrRuleLen tag value %s", tagVal),
-		}
+		panic(fmt.Sprintf("invalid StrRuleLen tag value: %q of field: %q", tagVal, fldName))
 	}
 	if len(fldVal) != strlen {
 		return &ValidationError{
@@ -51,10 +45,7 @@ func validateStringRuleRegexp(tagVal, fldName, fldVal string) *ValidationError {
 	pattern := tagVal
 	ok, err := regexp.MatchString(pattern, fldVal)
 	if err != nil {
-		return &ValidationError{
-			Field: fldName,
-			Err:   fmt.Errorf("invalid StrRuleRegexp tag value %s", tagVal),
-		}
+		panic(fmt.Sprintf("invalid StrRuleRegexp tag value: %q of field: %q", tagVal, fldName))
 	}
 	if !ok {
 		return &ValidationError{

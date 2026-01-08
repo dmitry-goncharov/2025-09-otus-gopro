@@ -23,19 +23,13 @@ func validateInt(tagName, tagVal, fldName string, fldVal int) *ValidationError {
 	case IntRuleIn:
 		return validateIntRuleIn(tagVal, fldName, fldVal)
 	}
-	return &ValidationError{
-		Field: fldName,
-		Err:   fmt.Errorf("invalid IntRule tag name %s", tagName),
-	}
+	panic(fmt.Sprintf("invalid IntRule tag name: %q of field: %q", tagName, fldName))
 }
 
 func validateIntRuleMin(tagVal, fldName string, fldVal int) *ValidationError {
 	num, err := strconv.Atoi(tagVal)
 	if err != nil {
-		return &ValidationError{
-			Field: fldName,
-			Err:   fmt.Errorf("invalid IntRuleMin tag value %s", tagVal),
-		}
+		panic(fmt.Sprintf("invalid IntRuleMin tag value: %q of field: %q", tagVal, fldName))
 	}
 	if fldVal < num {
 		return &ValidationError{
@@ -49,10 +43,7 @@ func validateIntRuleMin(tagVal, fldName string, fldVal int) *ValidationError {
 func validateIntRuleMax(tagVal, fldName string, fldVal int) *ValidationError {
 	num, err := strconv.Atoi(tagVal)
 	if err != nil {
-		return &ValidationError{
-			Field: fldName,
-			Err:   fmt.Errorf("invalid IntRuleMax tag value %s", tagVal),
-		}
+		panic(fmt.Sprintf("invalid IntRuleMax tag value: %q of field: %q", tagVal, fldName))
 	}
 	if fldVal > num {
 		return &ValidationError{
@@ -69,10 +60,7 @@ func validateIntRuleIn(tagVal, fldName string, fldVal int) *ValidationError {
 	for _, part := range parts {
 		num, err := strconv.Atoi(part)
 		if err != nil {
-			return &ValidationError{
-				Field: fldName,
-				Err:   fmt.Errorf("invalid IntRuleIn tag value %s", tagVal),
-			}
+			panic(fmt.Sprintf("invalid IntRuleIn tag value: %q of field: %q", tagVal, fldName))
 		}
 		nums = append(nums, num)
 	}

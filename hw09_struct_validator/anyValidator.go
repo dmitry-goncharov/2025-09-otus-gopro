@@ -36,10 +36,7 @@ func validateAny(tagValue, fldName string, fldValue reflect.Value) ValidationErr
 func validatePrime(tagValue, fldName string, fldValue reflect.Value) *ValidationError {
 	parts := strings.Split(tagValue, RuleSeparator)
 	if len(parts) != 2 {
-		return &ValidationError{
-			Field: fldName,
-			Err:   fmt.Errorf("invalid rule tag value %s", tagValue),
-		}
+		panic(fmt.Sprintf("invalid rule tag value: %q of field: %q", tagValue, fldName))
 	}
 	tagName := parts[0]
 	tagVal := parts[1]
