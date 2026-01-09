@@ -15,54 +15,98 @@ const (
 	StringRuleInValSep = ","
 )
 
-func validateString(tagName, tagVal, fldName, fldVal string) *ValidationError {
-	switch tagName {
-	case StringRuleLen:
-		return validateStringRuleLen(tagVal, fldName, fldVal)
-	case StringRuleRegexp:
-		return validateStringRuleRegexp(tagVal, fldName, fldVal)
-	case StringRuleIn:
-		return validateStringRuleIn(tagVal, fldName, fldVal)
-	}
-	panic(fmt.Sprintf("invalid StringRule tag name: %q of field: %q", tagName, fldName))
+type StringRuleLenValidator struct {
+	fldName string
+	fldVal  string
+	strlen  int
 }
 
-func validateStringRuleLen(tagVal, fldName, fldVal string) *ValidationError {
-	strlen, err := strconv.Atoi(tagVal)
-	if err != nil {
-		panic(fmt.Sprintf("invalid StrRuleLen tag value: %q of field: %q", tagVal, fldName))
-	}
-	if len(fldVal) != strlen {
+func (v *StringRuleLenValidator) Validate() *ValidationError {
+	if len(v.fldVal) != v.strlen {
 		return &ValidationError{
-			Field: fldName,
-			Err:   fmt.Errorf("%s should be length %d", fldVal, strlen),
+			Field: v.fldName,
+			Err:   fmt.Errorf("%s should be length %d", v.fldVal, v.strlen),
 		}
 	}
 	return nil
 }
 
-func validateStringRuleRegexp(tagVal, fldName, fldVal string) *ValidationError {
+type StringRuleRegexpValidator struct {
+	fldName string
+	fldVal  string
+	ok      bool
+	pattern string
+}
+
+func (v *StringRuleRegexpValidator) Validate() *ValidationError {
+	if !v.ok {
+		return &ValidationError{
+			Field: v.fldName,
+			Err:   fmt.Errorf("%s should be match with regexp pattern %s", v.fldVal, v.pattern),
+		}
+	}
+	return nil
+}
+
+type StringRuleInValidator struct {
+	fldName string
+	fldVal  string
+	parts   []string
+}
+
+func (v *StringRuleInValidator) Validate() *ValidationError {
+	if !slices.Contains(v.parts, v.fldVal) {
+		return &ValidationError{
+			Field: v.fldName,
+			Err:   fmt.Errorf("%s should be in %s", v.fldVal, v.parts),
+		}
+	}
+	return nil
+}
+
+func stringValidator(tagName, tagVal, fldName, fldVal string) (Validator, error) {
+	switch tagName {
+	case StringRuleLen:
+		return stringRuleLenValidator(tagVal, fldName, fldVal)
+	case StringRuleRegexp:
+		return stringRuleRegexpValidator(tagVal, fldName, fldVal)
+	case StringRuleIn:
+		return stringRuleInValidator(tagVal, fldName, fldVal)
+	}
+	return nil, fmt.Errorf("invalid StringRule tag name: %q of field: %q", tagName, fldName)
+}
+
+func stringRuleLenValidator(tagVal, fldName, fldVal string) (Validator, error) {
+	strlen, err := strconv.Atoi(tagVal)
+	if err != nil {
+		return nil, fmt.Errorf("invalid StrRuleLen tag value: %q of field: %q, err: %w", tagVal, fldName, err)
+	}
+	return &StringRuleLenValidator{
+		fldName: fldName,
+		fldVal:  fldVal,
+		strlen:  strlen,
+	}, nil
+}
+
+func stringRuleRegexpValidator(tagVal, fldName, fldVal string) (Validator, error) {
 	pattern := tagVal
 	ok, err := regexp.MatchString(pattern, fldVal)
 	if err != nil {
-		panic(fmt.Sprintf("invalid StrRuleRegexp tag value: %q of field: %q", tagVal, fldName))
+		return nil, fmt.Errorf("invalid StrRuleRegexp tag value: %q of field: %q, err: %w", tagVal, fldName, err)
 	}
-	if !ok {
-		return &ValidationError{
-			Field: fldName,
-			Err:   fmt.Errorf("%s should be match with regexp pattern %s", fldVal, pattern),
-		}
-	}
-	return nil
+	return &StringRuleRegexpValidator{
+		fldName: fldName,
+		fldVal:  fldVal,
+		ok:      ok,
+		pattern: pattern,
+	}, nil
 }
 
-func validateStringRuleIn(tagVal, fldName, fldVal string) *ValidationError {
+func stringRuleInValidator(tagVal, fldName, fldVal string) (Validator, error) {
 	parts := strings.Split(tagVal, StringRuleInValSep)
-	if !slices.Contains(parts, fldVal) {
-		return &ValidationError{
-			Field: fldName,
-			Err:   fmt.Errorf("%s should be in %s", fldVal, parts),
-		}
-	}
-	return nil
+	return &StringRuleInValidator{
+		fldName: fldName,
+		fldVal:  fldVal,
+		parts:   parts,
+	}, nil
 }

@@ -2,8 +2,14 @@ package hw09structvalidator
 
 import (
 	"fmt"
-	"reflect"
+	"strings"
 )
+
+type Validator interface {
+	Validate() *ValidationError
+}
+
+type Validators []Validator
 
 type ValidationError struct {
 	Field string
@@ -16,39 +22,28 @@ func (v ValidationErrors) Error() string {
 	if len(v) == 0 {
 		return ""
 	}
-	msg := fmt.Sprintln("Validation failed")
+	msg := strings.Builder{}
+	msg.WriteString("Validation failed")
 	for _, err := range v {
-		msg += fmt.Sprintln("Field", err.Field, "Err", err.Err.Error())
+		msg.WriteString(fmt.Sprintln("Field", err.Field, "Err", err.Err.Error()))
 	}
-	return msg
+	return msg.String()
 }
 
-const (
-	ValidateTag = "validate"
-)
-
 func Validate(v interface{}) error {
-	refType := reflect.TypeOf(v)
-
-	if refType.Kind() != reflect.Struct {
-		return nil
+	validators, err := buildValidators(v)
+	if err != nil {
+		return fmt.Errorf("error building validators for %v, err: %w", v, err)
 	}
 
 	errors := ValidationErrors{}
-
-	refVal := reflect.ValueOf(v)
-	n := refVal.NumField()
-	for i := range n {
-		fldType := refType.Field(i)
-		fldValue := refVal.Field(i)
-
-		tagValue := fldType.Tag.Get(ValidateTag)
-
-		if len(tagValue) == 0 {
-			continue
+	for _, validator := range validators {
+		if validator != nil {
+			validationError := validator.Validate()
+			if validationError != nil {
+				errors = append(errors, *validationError)
+			}
 		}
-
-		errors = append(errors, validateAny(tagValue, fldType.Name, fldValue)...)
 	}
 
 	if len(errors) == 0 {

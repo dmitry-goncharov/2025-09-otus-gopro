@@ -14,61 +14,105 @@ const (
 	IntRuleInValSep = ","
 )
 
-func validateInt(tagName, tagVal, fldName string, fldVal int) *ValidationError {
+type IntRuleMinValidator struct {
+	fldName string
+	fldVal  int
+	num     int
+}
+
+func (v *IntRuleMinValidator) Validate() *ValidationError {
+	if v.fldVal < v.num {
+		return &ValidationError{
+			Field: v.fldName,
+			Err:   fmt.Errorf("%d should not be less than %d", v.fldVal, v.num),
+		}
+	}
+	return nil
+}
+
+type IntRuleMaxValidator struct {
+	fldName string
+	fldVal  int
+	num     int
+}
+
+func (v *IntRuleMaxValidator) Validate() *ValidationError {
+	if v.fldVal > v.num {
+		return &ValidationError{
+			Field: v.fldName,
+			Err:   fmt.Errorf("%d should not be more than %d", v.fldVal, v.num),
+		}
+	}
+	return nil
+}
+
+type IntRuleInValidator struct {
+	fldName string
+	fldVal  int
+	nums    []int
+	parts   []string
+}
+
+func (v *IntRuleInValidator) Validate() *ValidationError {
+	if !slices.Contains(v.nums, v.fldVal) {
+		return &ValidationError{
+			Field: v.fldName,
+			Err:   fmt.Errorf("%d should be in %s", v.fldVal, v.parts),
+		}
+	}
+	return nil
+}
+
+func intValidator(tagName, tagVal, fldName string, fldVal int) (Validator, error) {
 	switch tagName {
 	case IntRuleMin:
-		return validateIntRuleMin(tagVal, fldName, fldVal)
+		return intRuleMinValidator(tagVal, fldName, fldVal)
 	case IntRuleMax:
-		return validateIntRuleMax(tagVal, fldName, fldVal)
+		return intRuleMaxValidator(tagVal, fldName, fldVal)
 	case IntRuleIn:
-		return validateIntRuleIn(tagVal, fldName, fldVal)
+		return intRuleInValidator(tagVal, fldName, fldVal)
 	}
-	panic(fmt.Sprintf("invalid IntRule tag name: %q of field: %q", tagName, fldName))
+	return nil, fmt.Errorf("invalid IntRule tag name: %q of field: %q", tagName, fldName)
 }
 
-func validateIntRuleMin(tagVal, fldName string, fldVal int) *ValidationError {
+func intRuleMinValidator(tagVal, fldName string, fldVal int) (Validator, error) {
 	num, err := strconv.Atoi(tagVal)
 	if err != nil {
-		panic(fmt.Sprintf("invalid IntRuleMin tag value: %q of field: %q", tagVal, fldName))
+		return nil, fmt.Errorf("invalid IntRuleMin tag value: %q of field: %q, err: %w", tagVal, fldName, err)
 	}
-	if fldVal < num {
-		return &ValidationError{
-			Field: fldName,
-			Err:   fmt.Errorf("%d should not be less than %d", fldVal, num),
-		}
-	}
-	return nil
+	return &IntRuleMinValidator{
+		fldName: fldName,
+		fldVal:  fldVal,
+		num:     num,
+	}, nil
 }
 
-func validateIntRuleMax(tagVal, fldName string, fldVal int) *ValidationError {
+func intRuleMaxValidator(tagVal, fldName string, fldVal int) (Validator, error) {
 	num, err := strconv.Atoi(tagVal)
 	if err != nil {
-		panic(fmt.Sprintf("invalid IntRuleMax tag value: %q of field: %q", tagVal, fldName))
+		return nil, fmt.Errorf("invalid IntRuleMax tag value: %q of field: %q, err: %w", tagVal, fldName, err)
 	}
-	if fldVal > num {
-		return &ValidationError{
-			Field: fldName,
-			Err:   fmt.Errorf("%d should not be more than %d", fldVal, num),
-		}
-	}
-	return nil
+	return &IntRuleMaxValidator{
+		fldName: fldName,
+		fldVal:  fldVal,
+		num:     num,
+	}, nil
 }
 
-func validateIntRuleIn(tagVal, fldName string, fldVal int) *ValidationError {
+func intRuleInValidator(tagVal, fldName string, fldVal int) (Validator, error) {
 	parts := strings.Split(tagVal, IntRuleInValSep)
 	nums := make([]int, 0, len(parts))
 	for _, part := range parts {
 		num, err := strconv.Atoi(part)
 		if err != nil {
-			panic(fmt.Sprintf("invalid IntRuleIn tag value: %q of field: %q", tagVal, fldName))
+			return nil, fmt.Errorf("invalid IntRuleIn tag value: %q of field: %q, err: %w", tagVal, fldName, err)
 		}
 		nums = append(nums, num)
 	}
-	if !slices.Contains(nums, fldVal) {
-		return &ValidationError{
-			Field: fldName,
-			Err:   fmt.Errorf("%d should be in %s", fldVal, parts),
-		}
-	}
-	return nil
+	return &IntRuleInValidator{
+		fldName: fldName,
+		fldVal:  fldVal,
+		nums:    nums,
+		parts:   parts,
+	}, nil
 }
