@@ -1,4 +1,4 @@
-module github.com/fixme_my_friend/hw11_telnet_client
+module github.com/dmitry-goncharov/2025-09-otus-gopro/hw11_telnet_client
 
 go 1.23
 
