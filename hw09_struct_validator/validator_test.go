@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type UserRole string
@@ -13,11 +15,11 @@ type (
 	User struct {
 		ID     string `json:"id" validate:"len:36"`
 		Name   string
-		Age    int             `validate:"min:18|max:50"`
-		Email  string          `validate:"regexp:^\\w+@\\w+\\.\\w+$"`
-		Role   UserRole        `validate:"in:admin,stuff"`
-		Phones []string        `validate:"len:11"`
-		meta   json.RawMessage //nolint:unused
+		Age    int      `validate:"min:18|max:50"`
+		Email  string   `validate:"regexp:^\\w+@\\w+\\.\\w+$"`
+		Role   UserRole `validate:"in:admin,stuff"`
+		Phones []string `validate:"len:11"`
+		meta   json.RawMessage
 	}
 
 	App struct {
@@ -42,10 +44,86 @@ func TestValidate(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			// Place your code here.
+			User{
+				ID:     "123456789012345678901234567890123456",
+				Name:   "some name",
+				Age:    20,
+				Email:  "example@example.ru",
+				Role:   "admin",
+				Phones: []string{"79111234567"},
+				meta:   nil,
+			},
+			nil,
 		},
-		// ...
-		// Place your code here.
+		{
+			User{
+				ID:     "12345678901234567890123456789012345",
+				Name:   "some name",
+				Age:    17,
+				Email:  "example@example.ru",
+				Role:   "user",
+				Phones: []string{"79111234567"},
+				meta:   nil,
+			},
+			ValidationErrors{
+				ValidationError{
+					Field: "ID",
+					Err:   fmt.Errorf("%s should be length %d", "12345678901234567890123456789012345", 36),
+				},
+				ValidationError{
+					Field: "Age",
+					Err:   fmt.Errorf("%d should not be less than %d", 17, 18),
+				},
+				ValidationError{
+					Field: "Role",
+					Err:   fmt.Errorf("%s should be in %s", "user", []string{"admin", "stuff"}),
+				},
+			},
+		},
+		{
+			App{
+				Version: "1.0.0",
+			},
+			nil,
+		},
+		{
+			App{
+				Version: "1.0",
+			},
+			ValidationErrors{
+				ValidationError{
+					Field: "Version",
+					Err:   fmt.Errorf("%s should be length %d", "1.0", 5),
+				},
+			},
+		},
+		{
+			Token{
+				Header:    []byte{0, 1, 2, 3, 4},
+				Payload:   []byte{5, 6, 7, 8, 9},
+				Signature: []byte{2, 3, 4, 5, 6},
+			},
+			nil,
+		},
+		{
+			Response{
+				Code: 200,
+				Body: "some body",
+			},
+			nil,
+		},
+		{
+			Response{
+				Code: 201,
+				Body: "some body",
+			},
+			ValidationErrors{
+				ValidationError{
+					Field: "Code",
+					Err:   fmt.Errorf("%d should be in %s", 201, []string{"200", "404", "500"}),
+				},
+			},
+		},
 	}
 
 	for i, tt := range tests {
@@ -53,8 +131,9 @@ func TestValidate(t *testing.T) {
 			tt := tt
 			t.Parallel()
 
-			// Place your code here.
-			_ = tt
+			err := Validate(tt.in)
+
+			require.Equal(t, tt.expectedErr, err)
 		})
 	}
 }
