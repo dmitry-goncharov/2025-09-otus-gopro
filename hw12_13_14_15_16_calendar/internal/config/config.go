@@ -8,11 +8,27 @@ import (
 )
 
 type Config struct {
-	Logger LoggerConf `yaml:"logger"`
+	Logger  LoggerConf  `yaml:"logger"`
+	Storage StorageConf `yaml:"storage"`
+	Server  ServerConf  `yaml:"server"`
 }
 
 type LoggerConf struct {
 	Level string `yaml:"level"`
+}
+
+type StorageConf struct {
+	Type string        `yaml:"type"`
+	DB   DBStorageConf `yaml:"db"`
+}
+
+type DBStorageConf struct {
+	Dsn string `yaml:"dsn"`
+}
+
+type ServerConf struct {
+	Host string `yaml:"host"`
+	Port string `yaml:"port"`
 }
 
 func NewConfig(configPath string) (*Config, error) {

@@ -13,7 +13,7 @@ import (
 	"github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar/internal/config"
 	"github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar/internal/storage/memory"
+	storagefactory "github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar/internal/storage/factory"
 )
 
 var configFile string
@@ -36,15 +36,32 @@ func main() {
 		os.Exit(1)
 	}
 
-	log := logger.New(config.Logger.Level)
+	log, err := logger.New(config.Logger.Level)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating logger: %v\n", err)
+		os.Exit(1)
+	}
 
-	storage := memorystorage.New()
-	calendar := app.New(log, storage)
+	storage, err := storagefactory.NewStorage(&config.Storage)
+	if err != nil {
+		log.Error("Error creating storage: " + err.Error())
+		os.Exit(1)
+	}
 
-	server := internalhttp.NewServer(log, calendar)
+	calendar := app.NewApplication(log, storage)
+
+	server := internalhttp.NewServer(config.Server, log, calendar)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
+
+	err = storage.Connect(ctx)
+	if err != nil {
+		log.Error("Error connecting to storage: " + err.Error())
+		cancel()
+		os.Exit(1) //nolint:gocritic
+	}
+	defer storage.Close(ctx)
 
 	go func() {
 		<-ctx.Done()
@@ -62,6 +79,6 @@ func main() {
 	if err := server.Start(ctx); err != nil {
 		log.Error("failed to start http server: " + err.Error())
 		cancel()
-		os.Exit(1) //nolint:gocritic
+		os.Exit(1)
 	}
 }
