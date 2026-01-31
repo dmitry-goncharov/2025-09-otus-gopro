@@ -9,9 +9,20 @@ import (
 	"github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar/internal/app"
 )
 
+type ResponseRecorder struct {
+	http.ResponseWriter
+	Status int
+}
+
+func (r *ResponseRecorder) WriteHeader(status int) {
+	r.Status = status
+	r.ResponseWriter.WriteHeader(status)
+}
+
 func loggingMiddleware(logger app.Logger, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
+		resp := &ResponseRecorder{ResponseWriter: w, Status: http.StatusOK}
 		defer func() {
 			remoteIP := strings.Split(r.RemoteAddr, ":")[0]
 			logger.Info(fmt.Sprintf(
@@ -21,11 +32,11 @@ func loggingMiddleware(logger app.Logger, next http.Handler) http.Handler {
 				r.Method,
 				r.RequestURI,
 				r.Proto,
-				r.Response.StatusCode,
+				resp.Status,
 				time.Since(start)/time.Microsecond,
 				r.UserAgent(),
 			))
 		}()
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(resp, r)
 	})
 }
