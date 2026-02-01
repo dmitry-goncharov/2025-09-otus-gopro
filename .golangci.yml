@@ -17,12 +17,19 @@ linters-settings:
         allow:
           - $gostd
           - "github.com/cheggaaa/pb/v3"
+          - "github.com/google/uuid"
+          - "github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar"
+          - "github.com/jmoiron/sqlx"
+          - "github.com/jackc/pgx/v5"
+          - "gopkg.in/yaml.v3"
       Test:
         files:
           - $test
         allow:
           - $gostd
           - github.com/stretchr/testify
+          - "github.com/google/uuid"
+          - "github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar"
 issues:
   exclude-rules:
     - path: _test\.go
