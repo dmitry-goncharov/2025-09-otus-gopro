@@ -36,15 +36,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	log, err := logger.New(config.Logger.Level)
+	log, err := logger.New(config.Logger.Level, config.Logger.Source)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error creating logger: %v\n", err)
 		os.Exit(1)
 	}
 
-	storage, err := storagefactory.NewStorage(&config.Storage)
+	storage, err := storagefactory.NewStorage(&config.Storage, log)
 	if err != nil {
-		log.Error("Error creating storage: " + err.Error())
+		log.Error("error creating storage: " + err.Error())
 		os.Exit(1)
 	}
 
@@ -57,7 +57,7 @@ func main() {
 
 	err = storage.Connect(ctx)
 	if err != nil {
-		log.Error("Error connecting to storage: " + err.Error())
+		log.Error("error connecting to storage: " + err.Error())
 		cancel()
 		os.Exit(1) //nolint:gocritic
 	}

@@ -15,15 +15,19 @@ import (
 type Storage struct {
 	db  *sqlx.DB
 	dsn *string
+	log app.Logger
 }
 
-func New(dsn string) app.Storage {
+func New(dsn string, log app.Logger) app.Storage {
 	return &Storage{
 		dsn: &dsn,
+		log: log,
 	}
 }
 
 func (s *Storage) Connect(ctx context.Context) error {
+	s.log.Debug("connect to sql storage")
+
 	db, err := sqlx.Open("pgx", *s.dsn)
 	if err != nil {
 		return fmt.Errorf("failed to open connection: %w", err)
@@ -37,6 +41,8 @@ func (s *Storage) Connect(ctx context.Context) error {
 }
 
 func (s *Storage) Close(_ context.Context) error {
+	s.log.Debug("close sql storage")
+
 	err := s.db.Close()
 	if err != nil {
 		return fmt.Errorf("failed to close db: %w", err)
@@ -45,6 +51,8 @@ func (s *Storage) Close(_ context.Context) error {
 }
 
 func (s *Storage) CreateEvent(ctx context.Context, evt storage.Event) error {
+	s.log.Debug("create event in sql storage, evt:" + evt.String())
+
 	query := `INSERT INTO events (id, title, date, user_id) VALUES (:id, :title, :date, :user_id);`
 
 	res, err := s.db.NamedExecContext(ctx, query, &evt)
@@ -62,9 +70,15 @@ func (s *Storage) CreateEvent(ctx context.Context, evt storage.Event) error {
 }
 
 func (s *Storage) UpdateEvent(ctx context.Context, evtID string, evt storage.Event) error {
-	query := `UPDATE events SET title = :title WHERE id = :id;`
+	s.log.Debug("update event in sql storage, evtID:" + evtID + ", evt:" + evt.String())
 
-	res, err := s.db.ExecContext(ctx, query, evt.Title, evtID)
+	query := `UPDATE events SET title = :title WHERE id = :id;`
+	args := map[string]any{
+		"title": evt.Title,
+		"id":    evtID,
+	}
+
+	res, err := s.db.NamedExecContext(ctx, query, args)
 	if err != nil {
 		return fmt.Errorf("error updating event: %w", err)
 	}
@@ -79,9 +93,14 @@ func (s *Storage) UpdateEvent(ctx context.Context, evtID string, evt storage.Eve
 }
 
 func (s *Storage) DeleteEvent(ctx context.Context, evtID string) error {
-	query := `DELETE FROM events WHERE id = :id;`
+	s.log.Debug("delete event in sql storage, evtID:" + evtID)
 
-	res, err := s.db.ExecContext(ctx, query, evtID)
+	query := `DELETE FROM events WHERE id = :id;`
+	args := map[string]any{
+		"id": evtID,
+	}
+
+	res, err := s.db.NamedExecContext(ctx, query, args)
 	if err != nil {
 		return fmt.Errorf("error deleting event: %w", err)
 	}
@@ -96,6 +115,8 @@ func (s *Storage) DeleteEvent(ctx context.Context, evtID string) error {
 }
 
 func (s *Storage) GetDayEvents(ctx context.Context, date time.Time) ([]storage.Event, error) {
+	s.log.Debug("get day events from sql storage, date:" + date.String())
+
 	y, m, d := date.Date()
 	begin := time.Date(y, m, d, 0, 0, 0, 0, date.Location())
 	end := begin.AddDate(0, 0, 1)
@@ -104,6 +125,8 @@ func (s *Storage) GetDayEvents(ctx context.Context, date time.Time) ([]storage.E
 }
 
 func (s *Storage) GetWeekEvents(ctx context.Context, date time.Time) ([]storage.Event, error) {
+	s.log.Debug("get week events from sql storage, date:" + date.String())
+
 	y, m, d := date.Date()
 	begin := time.Date(y, m, d, 0, 0, 0, 0, date.Location())
 	end := begin.AddDate(0, 0, 7)
@@ -112,6 +135,8 @@ func (s *Storage) GetWeekEvents(ctx context.Context, date time.Time) ([]storage.
 }
 
 func (s *Storage) GetMonthEvents(ctx context.Context, date time.Time) ([]storage.Event, error) {
+	s.log.Debug("get month events from sql storage, date:" + date.String())
+
 	y, m, d := date.Date()
 	begin := time.Date(y, m, d, 0, 0, 0, 0, date.Location())
 	end := begin.AddDate(0, 1, 0)
@@ -120,12 +145,11 @@ func (s *Storage) GetMonthEvents(ctx context.Context, date time.Time) ([]storage
 }
 
 func (s *Storage) getEventsByRange(ctx context.Context, begin time.Time, end time.Time) ([]storage.Event, error) {
+	query := `select * from events where date >= :begin and date < :end;`
 	args := map[string]any{
 		"begin": begin,
 		"end":   end,
 	}
-
-	query := `select * from events where date >= :begin and date < :end;`
 
 	rows, err := s.db.NamedQueryContext(ctx, query, args)
 	if err != nil {

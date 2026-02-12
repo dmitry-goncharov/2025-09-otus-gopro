@@ -17,14 +17,15 @@ type Logger struct {
 	logger *slog.Logger
 }
 
-func New(level string) (*Logger, error) {
+func New(level string, source bool) (*Logger, error) {
 	loglevel, err := parseLevel(level)
 	if err != nil {
 		return nil, err
 	}
 
 	options := &slog.HandlerOptions{
-		Level: loglevel,
+		AddSource: source,
+		Level:     loglevel,
 	}
 
 	return &Logger{

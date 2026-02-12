@@ -2,6 +2,7 @@ package storage
 
 import (
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -16,3 +17,7 @@ var (
 	ErrAlreadyExists = errors.New("event with given id already exists")
 	ErrNotFound      = errors.New("event with given id was not found")
 )
+
+func (e *Event) String() string {
+	return fmt.Sprintf("Event{ID: %s, Title: %s, Date: %v, UserId: %s}", e.ID, e.Title, e.Date, e.UserID)
+}

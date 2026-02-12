@@ -14,7 +14,8 @@ type Config struct {
 }
 
 type LoggerConf struct {
-	Level string `yaml:"level"`
+	Level  string `yaml:"level"`
+	Source bool   `yaml:"source"`
 }
 
 type StorageConf struct {

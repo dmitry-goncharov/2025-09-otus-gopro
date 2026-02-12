@@ -1,5 +1,6 @@
 logger:
-  level: "info"
+  level: "debug"
+  source: false
 storage:
   type: "db"
   db:
