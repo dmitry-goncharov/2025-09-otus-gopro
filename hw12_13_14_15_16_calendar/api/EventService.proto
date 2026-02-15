@@ -1,7 +1,64 @@
 syntax = "proto3";
 
+// protoc ./api/EventService.proto --go_out=./internal/server/grpc/ --go-grpc_out=./internal/server/grpc/
+
 package event;
 
+option go_package = "./;internalgrpc";
+
+import "google/protobuf/timestamp.proto";
+
 message Event {
-    // TODO
+    string ID = 1;
+    string title = 2;
+    google.protobuf.Timestamp date = 3;
+    string userID = 4;
+}
+
+message CreateEventReq {
+    string title = 1;
+    string userID = 2;
+}
+
+message CreateEventResp {
+    Event event = 1;
+}
+
+message UpdateEventReq {
+    Event event = 1;
+}
+
+message UpdateEventResp {
+    Event event = 1;
+}
+
+message DeleteEventReq {
+    string ID = 1;
+}
+
+message DeleteEventResp {
+}
+
+message GetEventsReq {
+    enum Period {
+        PERIOD_UNSPECIFIED = 0;
+        PERIOD_DAY = 1;
+        PERIOD_WEEK = 2;
+        PERIOD_MONTH = 3;
+    }
+    Period period = 1;
+    int32 year = 2;
+    int32 month = 3;
+    int32 day = 4;
+}
+
+message GetEventsResp {
+    repeated Event events = 1;
+}
+
+service EventService {
+    rpc AddEvent(CreateEventReq) returns (CreateEventResp) {}
+    rpc UpdateEvent(UpdateEventReq) returns (UpdateEventResp) {}
+    rpc DeleteEvent(DeleteEventReq) returns (DeleteEventResp) {}
+    rpc GetEvents(GetEventsReq) returns (GetEventsResp) {}
 }

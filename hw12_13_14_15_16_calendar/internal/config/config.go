@@ -8,9 +8,10 @@ import (
 )
 
 type Config struct {
-	Logger  LoggerConf  `yaml:"logger"`
-	Storage StorageConf `yaml:"storage"`
-	Server  ServerConf  `yaml:"server"`
+	Logger     LoggerConf  `yaml:"logger"`
+	Storage    StorageConf `yaml:"storage"`
+	HTTPServer ServerConf  `yaml:"httpserver"`
+	GRPCServer ServerConf  `yaml:"grpcserver"`
 }
 
 type LoggerConf struct {

@@ -62,8 +62,8 @@ func NewApplication(logger Logger, storage Storage) Application {
 func (a *App) CreateEvent(ctx context.Context, title string) (*Event, error) {
 	a.Logger.Debug("create event, title:" + title)
 
-	userID, ok := ctx.Value(UserIDKey).(ContextKey)
-	if !ok {
+	userID := ctx.Value(UserIDKey)
+	if userID == "" {
 		return nil, ErrNoUserID
 	}
 
@@ -71,7 +71,7 @@ func (a *App) CreateEvent(ctx context.Context, title string) (*Event, error) {
 		ID:     uuid.New().String(),
 		Title:  title,
 		Date:   time.Now(),
-		UserID: string(userID),
+		UserID: userID.(string),
 	}
 
 	err := a.Storage.CreateEvent(ctx, evt)

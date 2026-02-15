@@ -19,7 +19,7 @@ type Server struct {
 	srv *http.Server
 }
 
-func NewServer(conf config.ServerConf, log app.Logger, app app.Application) *Server {
+func NewServer(conf *config.ServerConf, log app.Logger, app app.Application) *Server {
 	handler := NewHandler(log, app)
 
 	router := http.NewServeMux()
@@ -44,17 +44,16 @@ func NewServer(conf config.ServerConf, log app.Logger, app app.Application) *Ser
 	}
 }
 
-func (s *Server) Start(ctx context.Context) error {
-	s.log.Info("http server starting on addr: " + s.srv.Addr)
+func (s *Server) Start(_ context.Context) error {
+	s.log.Info("http server is starting on addr: " + s.srv.Addr)
 	err := s.srv.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
 		return err
 	}
-	<-ctx.Done()
 	return nil
 }
 
 func (s *Server) Stop(ctx context.Context) error {
-	s.log.Info("http server stopping")
+	s.log.Info("http server is stopping")
 	return s.srv.Shutdown(ctx)
 }
