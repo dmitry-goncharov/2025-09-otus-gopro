@@ -109,7 +109,7 @@ func TestLogger(t *testing.T) {
 			r, w, _ := os.Pipe()
 			os.Stdout = w
 
-			log, err := New(tc.logLevel)
+			log, err := New(tc.logLevel, false)
 
 			require.NoError(t, err)
 
@@ -137,7 +137,7 @@ func TestLogger(t *testing.T) {
 	}
 
 	t.Run("invalid log level", func(t *testing.T) {
-		log, err := New("some")
+		log, err := New("some", false)
 
 		require.Error(t, err)
 		require.Nil(t, log)

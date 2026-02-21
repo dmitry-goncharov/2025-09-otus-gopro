@@ -14,12 +14,12 @@ const (
 	DBStorage = "db"
 )
 
-func NewStorage(storageConf *config.StorageConf) (app.Storage, error) {
+func NewStorage(storageConf *config.StorageConf, log app.Logger) (app.Storage, error) {
 	switch storageConf.Type {
 	case IMStorage:
 		return memorystorage.New(), nil
 	case DBStorage:
-		return sqlstorage.New(storageConf.DB.Dsn), nil
+		return sqlstorage.New(storageConf.DB.Dsn, log), nil
 	default:
 		return nil, fmt.Errorf("illegal storage type: %s", storageConf.Type)
 	}

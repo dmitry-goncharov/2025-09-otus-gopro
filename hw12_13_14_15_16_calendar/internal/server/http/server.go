@@ -10,16 +10,24 @@ import (
 	"github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar/internal/config"
 )
 
+const (
+	UserID = "X-User-Id"
+)
+
 type Server struct {
 	log app.Logger
 	srv *http.Server
 }
 
-func NewServer(conf config.ServerConf, log app.Logger, app app.Application) *Server {
+func NewServer(conf *config.ServerConf, log app.Logger, app app.Application) *Server {
 	handler := NewHandler(log, app)
 
 	router := http.NewServeMux()
 	router.HandleFunc("GET /hello", handler.Hello)
+	router.HandleFunc("POST /events", handler.AddEvent)
+	router.HandleFunc("POST /events/{id}", handler.UpdateEvent)
+	router.HandleFunc("DELETE /events/{id}", handler.DeleteEvent)
+	router.HandleFunc("GET /events", handler.GetEvents)
 
 	server := &http.Server{
 		Addr:              net.JoinHostPort(conf.Host, conf.Port),
@@ -36,17 +44,16 @@ func NewServer(conf config.ServerConf, log app.Logger, app app.Application) *Ser
 	}
 }
 
-func (s *Server) Start(ctx context.Context) error {
-	s.log.Info("Server starting on addr: " + s.srv.Addr)
+func (s *Server) Start(_ context.Context) error {
+	s.log.Info("http server is starting on addr: " + s.srv.Addr)
 	err := s.srv.ListenAndServe()
-	if err != nil {
+	if err != nil && err != http.ErrServerClosed {
 		return err
 	}
-	<-ctx.Done()
 	return nil
 }
 
 func (s *Server) Stop(ctx context.Context) error {
-	s.log.Info("Server stopping")
+	s.log.Info("http server is stopping")
 	return s.srv.Shutdown(ctx)
 }
