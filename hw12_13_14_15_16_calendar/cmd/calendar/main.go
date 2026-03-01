@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar/cmd"
 	"github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar/internal/app"
 	"github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar/internal/config"
 	"github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar/internal/logger"
@@ -26,8 +27,8 @@ func init() {
 func main() {
 	flag.Parse()
 
-	if flag.Arg(0) == "version" {
-		printVersion()
+	if flag.Arg(0) == cmd.VERSION {
+		cmd.PrintVersion()
 		return
 	}
 

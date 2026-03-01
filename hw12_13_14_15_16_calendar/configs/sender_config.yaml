@@ -1,0 +1,8 @@
+logger:
+  level: "debug"
+  source: false
+queue:
+  type: "rmq"
+  rmq:
+    dsn : "amqp://guest:guest@localhost:5672"
+    qname: "calendarmesssages"
