@@ -16,7 +16,7 @@ type Event struct {
 }
 
 func (e *Event) String() string {
-	return fmt.Sprintf("Event{ID: %s, Title: %s, Date: %v, UserId: %s}", e.ID, e.Title, e.Date, e.UserID)
+	return fmt.Sprintf("Event{ID: %s, Title: %s, Date: %v, UserID: %s}", e.ID, e.Title, e.Date, e.UserID)
 }
 
 func MapAppEventToStorageEvent(appEvent *Event) *storage.Event {

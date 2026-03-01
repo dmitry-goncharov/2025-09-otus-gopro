@@ -121,7 +121,7 @@ func (s *Storage) GetDayEvents(ctx context.Context, date time.Time) ([]storage.E
 	begin := time.Date(y, m, d, 0, 0, 0, 0, date.Location())
 	end := begin.AddDate(0, 0, 1)
 
-	return s.getEventsByRange(ctx, begin, end)
+	return s.GetEventsByRange(ctx, begin, end)
 }
 
 func (s *Storage) GetWeekEvents(ctx context.Context, date time.Time) ([]storage.Event, error) {
@@ -131,7 +131,7 @@ func (s *Storage) GetWeekEvents(ctx context.Context, date time.Time) ([]storage.
 	begin := time.Date(y, m, d, 0, 0, 0, 0, date.Location())
 	end := begin.AddDate(0, 0, 7)
 
-	return s.getEventsByRange(ctx, begin, end)
+	return s.GetEventsByRange(ctx, begin, end)
 }
 
 func (s *Storage) GetMonthEvents(ctx context.Context, date time.Time) ([]storage.Event, error) {
@@ -141,10 +141,10 @@ func (s *Storage) GetMonthEvents(ctx context.Context, date time.Time) ([]storage
 	begin := time.Date(y, m, d, 0, 0, 0, 0, date.Location())
 	end := begin.AddDate(0, 1, 0)
 
-	return s.getEventsByRange(ctx, begin, end)
+	return s.GetEventsByRange(ctx, begin, end)
 }
 
-func (s *Storage) getEventsByRange(ctx context.Context, begin time.Time, end time.Time) ([]storage.Event, error) {
+func (s *Storage) GetEventsByRange(ctx context.Context, begin time.Time, end time.Time) ([]storage.Event, error) {
 	query := `select * from events where date >= :begin and date < :end;`
 	args := map[string]any{
 		"begin": begin,
@@ -167,4 +167,18 @@ func (s *Storage) getEventsByRange(ctx context.Context, begin time.Time, end tim
 	}
 
 	return events, nil
+}
+
+func (s *Storage) DeleteOutdatedEvents(ctx context.Context, date time.Time) error {
+	query := `delete from events where date < :date`
+	args := map[string]any{
+		"date": date,
+	}
+
+	_, err := s.db.NamedQueryContext(ctx, query, args)
+	if err != nil {
+		return fmt.Errorf("error executing query: %w", err)
+	}
+
+	return nil
 }

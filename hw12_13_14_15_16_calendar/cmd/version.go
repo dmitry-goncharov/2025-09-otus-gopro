@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"encoding/json"
@@ -6,13 +6,15 @@ import (
 	"os"
 )
 
+const VERSION = "version"
+
 var (
 	release   = "UNKNOWN"
 	buildDate = "UNKNOWN"
 	gitHash   = "UNKNOWN"
 )
 
-func printVersion() {
+func PrintVersion() {
 	if err := json.NewEncoder(os.Stdout).Encode(struct {
 		Release   string
 		BuildDate string
