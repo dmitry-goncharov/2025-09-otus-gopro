@@ -45,6 +45,8 @@ type Storage interface {
 	GetDayEvents(ctx context.Context, date time.Time) ([]storage.Event, error)
 	GetWeekEvents(ctx context.Context, date time.Time) ([]storage.Event, error)
 	GetMonthEvents(ctx context.Context, date time.Time) ([]storage.Event, error)
+	GetEventsByRange(ctx context.Context, begin time.Time, end time.Time) ([]storage.Event, error)
+	DeleteOutdatedEvents(ctx context.Context, date time.Time) error
 }
 
 type App struct {

@@ -69,7 +69,7 @@ func (s *Storage) DeleteEvent(_ context.Context, evtID string) error {
 	return nil
 }
 
-func (s *Storage) GetDayEvents(_ context.Context, date time.Time) ([]storage.Event, error) {
+func (s *Storage) GetDayEvents(ctx context.Context, date time.Time) ([]storage.Event, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -77,10 +77,10 @@ func (s *Storage) GetDayEvents(_ context.Context, date time.Time) ([]storage.Eve
 	begin := time.Date(y, m, d, 0, 0, 0, 0, date.Location())
 	end := begin.AddDate(0, 0, 1)
 
-	return s.getEventsByRange(begin, end), nil
+	return s.GetEventsByRange(ctx, begin, end)
 }
 
-func (s *Storage) GetWeekEvents(_ context.Context, date time.Time) ([]storage.Event, error) {
+func (s *Storage) GetWeekEvents(ctx context.Context, date time.Time) ([]storage.Event, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -88,10 +88,10 @@ func (s *Storage) GetWeekEvents(_ context.Context, date time.Time) ([]storage.Ev
 	begin := time.Date(y, m, d, 0, 0, 0, 0, date.Location())
 	end := begin.AddDate(0, 0, 7)
 
-	return s.getEventsByRange(begin, end), nil
+	return s.GetEventsByRange(ctx, begin, end)
 }
 
-func (s *Storage) GetMonthEvents(_ context.Context, date time.Time) ([]storage.Event, error) {
+func (s *Storage) GetMonthEvents(ctx context.Context, date time.Time) ([]storage.Event, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -99,10 +99,10 @@ func (s *Storage) GetMonthEvents(_ context.Context, date time.Time) ([]storage.E
 	begin := time.Date(y, m, d, 0, 0, 0, 0, date.Location())
 	end := begin.AddDate(0, 1, 0)
 
-	return s.getEventsByRange(begin, end), nil
+	return s.GetEventsByRange(ctx, begin, end)
 }
 
-func (s *Storage) getEventsByRange(begin time.Time, end time.Time) []storage.Event {
+func (s *Storage) GetEventsByRange(_ context.Context, begin time.Time, end time.Time) ([]storage.Event, error) {
 	res := make([]storage.Event, 0)
 	for _, evt := range s.evts {
 		slog.Debug("get events by range", slog.Any("evtDate", evt.Date), slog.Any("begin", begin), slog.Any("end", end))
@@ -111,5 +111,16 @@ func (s *Storage) getEventsByRange(begin time.Time, end time.Time) []storage.Eve
 			res = append(res, evt)
 		}
 	}
-	return res
+	return res, nil
+}
+
+func (s *Storage) DeleteOutdatedEvents(_ context.Context, date time.Time) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for key, e := range s.evts {
+		if e.Date.Before(date) {
+			delete(s.evts, key)
+		}
+	}
+	return nil
 }

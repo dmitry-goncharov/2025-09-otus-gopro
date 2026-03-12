@@ -14,20 +14,6 @@ type Config struct {
 	GRPCServer ServerConf  `yaml:"grpcserver"`
 }
 
-type LoggerConf struct {
-	Level  string `yaml:"level"`
-	Source bool   `yaml:"source"`
-}
-
-type StorageConf struct {
-	Type string        `yaml:"type"`
-	DB   DBStorageConf `yaml:"db"`
-}
-
-type DBStorageConf struct {
-	Dsn string `yaml:"dsn"`
-}
-
 type ServerConf struct {
 	Host string `yaml:"host"`
 	Port string `yaml:"port"`
