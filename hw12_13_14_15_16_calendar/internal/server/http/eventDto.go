@@ -16,7 +16,8 @@ const (
 )
 
 type EventTitleDto struct {
-	Title string `json:"title"`
+	Title string    `json:"title"`
+	Date  time.Time `json:"date"`
 }
 
 type EventDto struct {

@@ -50,7 +50,7 @@ func (h *Handler) AddEvent(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.WithValue(context.Background(), app.UserIDKey, userID), time.Second*5)
 	defer cancel()
 
-	event, err := h.app.CreateEvent(ctx, dto.Title)
+	event, err := h.app.CreateEvent(ctx, dto.Title, dto.Date)
 	if err != nil {
 		h.logAppError(err, "create event")
 		w.WriteHeader(mapAppErrorToHTTPStatus(err))

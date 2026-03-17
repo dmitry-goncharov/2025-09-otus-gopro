@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar/internal/app"
 	"github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar/internal/logger"
@@ -20,6 +21,7 @@ var handler = NewHandler(logger.NewMock(), app.NewApplication(logger.NewMock(), 
 func TestAddEventHandler(t *testing.T) {
 	req := EventTitleDto{
 		Title: "some title",
+		Date:  time.Now(),
 	}
 	body, err := json.Marshal(req)
 	require.NoError(t, err)

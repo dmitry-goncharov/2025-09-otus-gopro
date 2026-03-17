@@ -16,7 +16,7 @@ services:
       timeout: 10s
       retries: 5
     volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql    
 
   mq:
     image: rabbitmq:4.2.4
@@ -64,3 +64,12 @@ services:
       mq:
         condition: service_healthy
     command: sh -c '/opt/calendar/calendar-sender --config /etc/calendar/sender_config.yaml'
+
+  integrationtest:
+    image: calendar-base:1.0.0
+    container_name: integrationtest
+    depends_on:
+      - app
+      - scheduler
+      - sender
+    command: go test -v -tags=integration ./tests/integration/...

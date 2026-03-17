@@ -11,14 +11,16 @@ import (
 )
 
 type Storage struct {
-	mu   sync.RWMutex
-	evts map[string]storage.Event
+	mu           sync.RWMutex
+	evts         map[string]storage.Event
+	notifcations map[string]time.Time
 }
 
 func New() app.Storage {
 	return &Storage{
-		mu:   sync.RWMutex{},
-		evts: make(map[string]storage.Event),
+		mu:           sync.RWMutex{},
+		evts:         make(map[string]storage.Event),
+		notifcations: make(map[string]time.Time),
 	}
 }
 
@@ -122,5 +124,12 @@ func (s *Storage) DeleteOutdatedEvents(_ context.Context, date time.Time) error 
 			delete(s.evts, key)
 		}
 	}
+	return nil
+}
+
+func (s *Storage) LogEventNotification(_ context.Context, evtID string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.notifcations[evtID] = time.Now()
 	return nil
 }

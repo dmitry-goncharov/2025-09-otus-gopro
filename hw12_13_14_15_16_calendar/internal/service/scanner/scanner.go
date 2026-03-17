@@ -26,8 +26,10 @@ func NewStorageScanner(log app.Logger, storage app.Storage, interval time.Durati
 }
 
 func (s *StorageScanner) Scan(ctx context.Context) []app.Message {
-	s.log.Debug("scan storage for interval " + s.interval.String())
-	events, err := s.storage.GetEventsByRange(ctx, time.Now(), time.Now().Add(s.interval))
+	begin := time.Now()
+	end := time.Now().Add(s.interval)
+	s.log.Debug("scan storage for interval " + s.interval.String() + " from " + begin.String() + " to " + end.String())
+	events, err := s.storage.GetEventsByRange(ctx, begin, end)
 	if err != nil {
 		s.log.Error("error scanning storage for interval " + s.interval.String())
 	}

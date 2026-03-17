@@ -21,7 +21,7 @@ var (
 )
 
 type Application interface {
-	CreateEvent(ctx context.Context, title string) (*Event, error)
+	CreateEvent(ctx context.Context, title string, date time.Time) (*Event, error)
 	UpdateEvent(ctx context.Context, event *Event) error
 	DeleteEvent(ctx context.Context, evtID string) error
 	GetDayEvents(ctx context.Context, date time.Time) ([]Event, error)
@@ -47,6 +47,7 @@ type Storage interface {
 	GetMonthEvents(ctx context.Context, date time.Time) ([]storage.Event, error)
 	GetEventsByRange(ctx context.Context, begin time.Time, end time.Time) ([]storage.Event, error)
 	DeleteOutdatedEvents(ctx context.Context, date time.Time) error
+	LogEventNotification(ctx context.Context, evtID string) error
 }
 
 type App struct {
@@ -61,8 +62,8 @@ func NewApplication(logger Logger, storage Storage) Application {
 	}
 }
 
-func (a *App) CreateEvent(ctx context.Context, title string) (*Event, error) {
-	a.Logger.Debug("create event, title:" + title)
+func (a *App) CreateEvent(ctx context.Context, title string, date time.Time) (*Event, error) {
+	a.Logger.Debug("create event, title:" + title + ", date:" + date.String())
 
 	userID := ctx.Value(UserIDKey)
 	if userID == "" {
@@ -72,7 +73,7 @@ func (a *App) CreateEvent(ctx context.Context, title string) (*Event, error) {
 	evt := storage.Event{
 		ID:     uuid.New().String(),
 		Title:  title,
-		Date:   time.Now(),
+		Date:   date,
 		UserID: userID.(string),
 	}
 

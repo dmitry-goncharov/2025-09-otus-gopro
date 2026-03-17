@@ -1,7 +1,7 @@
--- +goose Up
--- +goose StatementBegin
+CREATE DATABASE otus;
+\c otus
 CREATE TABLE events (
-	id uuid PRIMARY KEY,    
+	id uuid PRIMARY KEY,
     title text NOT NULL,
     date timestamptz NOT NULL,
     user_id uuid NOT NULL
@@ -11,11 +11,3 @@ CREATE TABLE event_notifications (
     event_id uuid NOT NULL,
     date timestamptz NOT NULL
 );
--- +goose StatementEnd
-
-
--- +goose Down
--- +goose StatementBegin
-DROP TABLE events;
-DROP TABLE event_notifications;
--- +goose StatementEnd
