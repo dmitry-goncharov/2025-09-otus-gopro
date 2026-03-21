@@ -67,7 +67,7 @@ func (s *Server) AddEvent(ctx context.Context, req *CreateEventReq) (*CreateEven
 	ctx, cancel := context.WithTimeout(context.WithValue(ctx, app.UserIDKey, req.UserID), time.Second*5)
 	defer cancel()
 
-	appEvent, err := s.app.CreateEvent(ctx, req.Title)
+	appEvent, err := s.app.CreateEvent(ctx, req.Title, req.Date.AsTime())
 	if err != nil {
 		return nil, fmt.Errorf("error adding event: %w", err)
 	}

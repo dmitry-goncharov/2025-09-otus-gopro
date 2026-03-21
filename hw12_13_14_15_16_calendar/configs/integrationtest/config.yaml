@@ -1,0 +1,13 @@
+logger:
+  level: "debug"
+  source: false
+storage:
+  type: "db"
+  db:
+    dsn: "host=db port=5432 user=postgres password=postgres dbname=otus sslmode=disable"
+httpserver:
+  host: "0.0.0.0"
+  port: "8080"
+grpcserver:
+  host: "0.0.0.0"
+  port: "8090"

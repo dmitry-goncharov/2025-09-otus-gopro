@@ -1,5 +1,8 @@
 BIN := "./bin/calendar"
-DOCKER_IMG="calendar:develop"
+DOCKER_IMG_APP="calendar-app:1.0.0"
+DOCKER_IMG_SCHEDULER="calendar-scheduler:1.0.0"
+DOCKER_IMG_SENDER="calendar-sender:1.0.0"
+DOCKER_IMG_BASE="calendar-base:1.0.0"
 
 GIT_HASH := $(shell git log --format="%h" -n 1)
 LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%dT%H:%M:%S) -X main.gitHash=$(GIT_HASH)
@@ -43,16 +46,36 @@ generate:
 	go generate ./...
 
 run: build
-	$(BIN) -config ./configs/config.toml
+	$(BIN) -config ./configs/config.yaml
 
-build-img:
+build-img-app:
 	docker build \
 		--build-arg=LDFLAGS="$(LDFLAGS)" \
-		-t $(DOCKER_IMG) \
+		-t $(DOCKER_IMG_APP) \
+		-f build/calendar/Dockerfile .
+
+build-img-scheduler:
+	docker build \
+		--build-arg=LDFLAGS="$(LDFLAGS)" \
+		-t $(DOCKER_IMG_SCHEDULER) \
+		-f build/scheduler/Dockerfile .
+
+build-img-sender:
+	docker build \
+		--build-arg=LDFLAGS="$(LDFLAGS)" \
+		-t $(DOCKER_IMG_SENDER) \
+		-f build/sender/Dockerfile .
+
+build-img:
+	build-img-app build-img-scheduler build-img-sender
+
+build-img-base:
+	docker build \
+		-t $(DOCKER_IMG_BASE) \
 		-f build/Dockerfile .
 
-run-img: build-img
-	docker run $(DOCKER_IMG)
+run-img: build-img-app
+	docker run $(DOCKER_IMG_APP)
 
 version: build
 	$(BIN) version
@@ -60,10 +83,19 @@ version: build
 test:
 	go test -race ./internal/...
 
+test-integration: build-img-base build-img
+	docker-compose -f ./deployments/integrationtest/docker-compose.yaml up --exit-code-from integrationtest && docker-compose -f ./deployments/integrationtest/docker-compose.yaml down -v
+
 install-lint-deps:
 	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.63.4
 
 lint: install-lint-deps
 	golangci-lint run ./...
 
-.PHONY: build run build-img run-img version test lint
+up: build-img
+	docker-compose -f ./deployments/docker-compose.yaml up -d
+
+down:
+	docker-compose -f ./deployments/docker-compose.yaml down -v
+
+.PHONY: build run build-img build-img-base build-img-app build-img-scheduler build-img-sender run-img version test test-integration lint up down

@@ -11,12 +11,14 @@ type Sender interface {
 }
 
 type LogSender struct {
-	log app.Logger
+	log     app.Logger
+	storage app.Storage
 }
 
-func NewLogSender(log app.Logger) Sender {
+func NewLogSender(log app.Logger, storage app.Storage) Sender {
 	return &LogSender{
-		log: log,
+		log:     log,
+		storage: storage,
 	}
 }
 
@@ -28,6 +30,10 @@ func (s *LogSender) Send(ctx context.Context, messages <-chan app.Message) {
 				return
 			case message := <-messages:
 				s.log.Debug("send message " + message.String())
+				err := s.storage.LogEventNotification(ctx, message.ID)
+				if err != nil {
+					s.log.Error("error logging event notification ID: " + message.ID)
+				}
 			}
 		}
 	}()

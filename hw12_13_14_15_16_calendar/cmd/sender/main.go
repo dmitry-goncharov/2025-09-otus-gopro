@@ -13,6 +13,7 @@ import (
 	"github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar/internal/logger"
 	queuefactory "github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar/internal/queue/factory"
 	"github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar/internal/service/sender"
+	storagefactory "github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar/internal/storage/factory"
 )
 
 var configFile string
@@ -41,6 +42,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	storage, err := storagefactory.NewStorage(&config.Storage, log)
+	if err != nil {
+		log.Error("error creating storage: " + err.Error())
+		os.Exit(1)
+	}
+
 	messageQueue, err := queuefactory.NewMessageQueue(log, &config.Queue)
 	if err != nil {
 		log.Error("error creating message queue: " + err.Error())
@@ -56,13 +63,26 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
 
+	err = storage.Connect(ctx)
+	if err != nil {
+		log.Error("error connecting to storage: " + err.Error())
+		cancel()
+		os.Exit(1) //nolint:gocritic
+	}
+	defer func() {
+		err := storage.Close(ctx)
+		if err != nil {
+			log.Error("failed to close storage: " + err.Error())
+		}
+	}()
+
 	messages, err := messageQueue.Consume(ctx)
 	if err != nil {
 		log.Error("error consuming messages: " + err.Error())
-		os.Exit(1) //nolint:gocritic
+		os.Exit(1)
 	}
 
-	sender := sender.NewLogSender(log)
+	sender := sender.NewLogSender(log, storage)
 	sender.Send(ctx, messages)
 
 	log.Info("sender is running...")

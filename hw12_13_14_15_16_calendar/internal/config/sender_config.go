@@ -8,8 +8,9 @@ import (
 )
 
 type SenderConfig struct {
-	Logger LoggerConf `yaml:"logger"`
-	Queue  QueueConf  `yaml:"queue"`
+	Logger  LoggerConf  `yaml:"logger"`
+	Storage StorageConf `yaml:"storage"`
+	Queue   QueueConf   `yaml:"queue"`
 }
 
 func NewSenderConfig(configPath string) (*SenderConfig, error) {

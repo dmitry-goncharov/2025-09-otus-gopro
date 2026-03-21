@@ -7,6 +7,7 @@ import (
 
 	"github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar/internal/app"
 	"github.com/dmitry-goncharov/2025-09-otus-gopro/hw12_13_14_15_calendar/internal/storage"
+	"github.com/google/uuid"
 	// Posgresql driver.
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
@@ -180,5 +181,22 @@ func (s *Storage) DeleteOutdatedEvents(ctx context.Context, date time.Time) erro
 		return fmt.Errorf("error executing query: %w", err)
 	}
 
+	return nil
+}
+
+func (s *Storage) LogEventNotification(ctx context.Context, evtID string) error {
+	s.log.Debug("log event notification in sql storage, evtID:" + evtID)
+
+	query := `INSERT INTO event_notifications (id, event_id, date) VALUES (:id, :event_id, :date);`
+	args := map[string]any{
+		"id":       uuid.New().String(),
+		"event_id": evtID,
+		"date":     time.Now(),
+	}
+
+	_, err := s.db.NamedExecContext(ctx, query, args)
+	if err != nil {
+		return fmt.Errorf("error logging event notification: %w", err)
+	}
 	return nil
 }

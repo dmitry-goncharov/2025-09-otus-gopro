@@ -18,6 +18,7 @@ message Event {
 message CreateEventReq {
     string title = 1;
     string userID = 2;
+    google.protobuf.Timestamp date = 3;
 }
 
 message CreateEventResp {

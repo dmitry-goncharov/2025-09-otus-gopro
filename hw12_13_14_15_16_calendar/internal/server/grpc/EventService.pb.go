@@ -148,6 +148,7 @@ type CreateEventReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
 	UserID        string                 `protobuf:"bytes,2,opt,name=userID,proto3" json:"userID,omitempty"`
+	Date          *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=date,proto3" json:"date,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -194,6 +195,13 @@ func (x *CreateEventReq) GetUserID() string {
 		return x.UserID
 	}
 	return ""
+}
+
+func (x *CreateEventReq) GetDate() *timestamppb.Timestamp {
+	if x != nil {
+		return x.Date
+	}
+	return nil
 }
 
 type CreateEventResp struct {
@@ -529,10 +537,11 @@ const file_api_EventService_proto_rawDesc = "" +
 	"\x02ID\x18\x01 \x01(\tR\x02ID\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12.\n" +
 	"\x04date\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x04date\x12\x16\n" +
-	"\x06userID\x18\x04 \x01(\tR\x06userID\">\n" +
+	"\x06userID\x18\x04 \x01(\tR\x06userID\"n\n" +
 	"\x0eCreateEventReq\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x16\n" +
-	"\x06userID\x18\x02 \x01(\tR\x06userID\"5\n" +
+	"\x06userID\x18\x02 \x01(\tR\x06userID\x12.\n" +
+	"\x04date\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x04date\"5\n" +
 	"\x0fCreateEventResp\x12\"\n" +
 	"\x05event\x18\x01 \x01(\v2\f.event.EventR\x05event\"4\n" +
 	"\x0eUpdateEventReq\x12\"\n" +
@@ -590,24 +599,25 @@ var file_api_EventService_proto_goTypes = []any{
 }
 var file_api_EventService_proto_depIdxs = []int32{
 	10, // 0: event.Event.date:type_name -> google.protobuf.Timestamp
-	1,  // 1: event.CreateEventResp.event:type_name -> event.Event
-	1,  // 2: event.UpdateEventReq.event:type_name -> event.Event
-	1,  // 3: event.UpdateEventResp.event:type_name -> event.Event
-	0,  // 4: event.GetEventsReq.period:type_name -> event.GetEventsReq.Period
-	1,  // 5: event.GetEventsResp.events:type_name -> event.Event
-	2,  // 6: event.EventService.AddEvent:input_type -> event.CreateEventReq
-	4,  // 7: event.EventService.UpdateEvent:input_type -> event.UpdateEventReq
-	6,  // 8: event.EventService.DeleteEvent:input_type -> event.DeleteEventReq
-	8,  // 9: event.EventService.GetEvents:input_type -> event.GetEventsReq
-	3,  // 10: event.EventService.AddEvent:output_type -> event.CreateEventResp
-	5,  // 11: event.EventService.UpdateEvent:output_type -> event.UpdateEventResp
-	7,  // 12: event.EventService.DeleteEvent:output_type -> event.DeleteEventResp
-	9,  // 13: event.EventService.GetEvents:output_type -> event.GetEventsResp
-	10, // [10:14] is the sub-list for method output_type
-	6,  // [6:10] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	10, // 1: event.CreateEventReq.date:type_name -> google.protobuf.Timestamp
+	1,  // 2: event.CreateEventResp.event:type_name -> event.Event
+	1,  // 3: event.UpdateEventReq.event:type_name -> event.Event
+	1,  // 4: event.UpdateEventResp.event:type_name -> event.Event
+	0,  // 5: event.GetEventsReq.period:type_name -> event.GetEventsReq.Period
+	1,  // 6: event.GetEventsResp.events:type_name -> event.Event
+	2,  // 7: event.EventService.AddEvent:input_type -> event.CreateEventReq
+	4,  // 8: event.EventService.UpdateEvent:input_type -> event.UpdateEventReq
+	6,  // 9: event.EventService.DeleteEvent:input_type -> event.DeleteEventReq
+	8,  // 10: event.EventService.GetEvents:input_type -> event.GetEventsReq
+	3,  // 11: event.EventService.AddEvent:output_type -> event.CreateEventResp
+	5,  // 12: event.EventService.UpdateEvent:output_type -> event.UpdateEventResp
+	7,  // 13: event.EventService.DeleteEvent:output_type -> event.DeleteEventResp
+	9,  // 14: event.EventService.GetEvents:output_type -> event.GetEventsResp
+	11, // [11:15] is the sub-list for method output_type
+	7,  // [7:11] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_api_EventService_proto_init() }
