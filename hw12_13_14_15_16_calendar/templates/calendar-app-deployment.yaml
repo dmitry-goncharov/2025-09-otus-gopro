@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calendar-app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: calendar-app
+  template:
+    metadata:
+      labels:
+        app: calendar-app
+    spec:
+      containers:
+      - name: calendar-app-container
+        image: calendar-app:1.0.1
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+          name: http
+        - containerPort: 8090
+          name: gprc

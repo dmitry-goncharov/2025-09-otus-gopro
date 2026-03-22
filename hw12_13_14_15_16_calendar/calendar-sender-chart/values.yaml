@@ -1,0 +1,7 @@
+sender:
+  replicaCount: 1
+  appLabel: calendar-sender
+  image:
+    repository: calendar-sender
+    tag: 1.0.1
+    pullPolicy: Never

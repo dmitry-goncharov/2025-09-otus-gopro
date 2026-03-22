@@ -1,0 +1,7 @@
+scheduler:
+  replicaCount: 1
+  appLabel: calendar-scheduler
+  image:
+    repository: calendar-scheduler
+    tag: 1.0.1
+    pullPolicy: Never
