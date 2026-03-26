@@ -1,0 +1,20 @@
+replicaCount: 1
+appLabel: calendar-app
+
+image:
+  repository: calendar-app
+  tag: 1.0.1
+  pullPolicy: Never
+
+service:
+  type: NodePort
+  portHttp: 8080
+  nodePortHttp: 30000
+  portGrpc: 8090
+  nodePortGrpc: 30001
+
+ingress:
+  className: nginx
+  host: calendar.service
+  pathHttp: "/http(/|$)(.*)"
+  pathGrpc: "/grpc(/|$)(.*)"
